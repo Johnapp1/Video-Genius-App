@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Wand2, Upload, Loader2 } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { apiRequest } from "@/lib/queryClient";
@@ -266,16 +266,22 @@ export default function CreateContent({ onShowProgress, onShowResults }: CreateC
                     <Label htmlFor="ai-length" className="block text-sm font-medium text-gray-700 mb-2">
                       Video Length
                     </Label>
-                    <Select onValueChange={(value) => aiForm.setValue("videoLength", value)}>
-                      <SelectTrigger className="border-2 border-red-500 focus:ring-red-500 focus:border-red-500" data-testid="select-video-length">
-                        <SelectValue placeholder="Select video length" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {videoLengths.map((length) => (
-                          <SelectItem key={length} value={length}>{length}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      name="videoLength"
+                      control={aiForm.control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="border-2 border-red-500 focus:ring-red-500 focus:border-red-500" data-testid="select-video-length">
+                            <SelectValue placeholder="Select video length" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {videoLengths.map((length) => (
+                              <SelectItem key={length} value={length}>{length}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                     {aiForm.formState.errors.videoLength && (
                       <p className="text-red-500 text-sm mt-1">{aiForm.formState.errors.videoLength.message}</p>
                     )}
@@ -286,21 +292,27 @@ export default function CreateContent({ onShowProgress, onShowResults }: CreateC
                   <Label htmlFor="ai-template" className="block text-sm font-medium text-gray-700 mb-2">
                     Content Template (Optional)
                   </Label>
-                  <Select onValueChange={(value) => aiForm.setValue("contentTemplate", value)}>
-                    <SelectTrigger className="border-2 border-red-500 focus:ring-red-500 focus:border-red-500" data-testid="select-template">
-                      <SelectValue placeholder="Select a template..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {templates.map((category) => (
-                        <div key={category.category}>
-                          <div className="px-2 py-1 text-sm font-semibold text-gray-500">{category.category}</div>
-                          {category.options.map((option) => (
-                            <SelectItem key={option} value={option}>{option}</SelectItem>
+                  <Controller
+                    name="contentTemplate"
+                    control={aiForm.control}
+                    render={({ field }) => (
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <SelectTrigger className="border-2 border-red-500 focus:ring-red-500 focus:border-red-500" data-testid="select-template">
+                          <SelectValue placeholder="Select a template..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {templates.map((category) => (
+                            <div key={category.category}>
+                              <div className="px-2 py-1 text-sm font-semibold text-gray-500">{category.category}</div>
+                              {category.options.map((option) => (
+                                <SelectItem key={option} value={option}>{option}</SelectItem>
+                              ))}
+                            </div>
                           ))}
-                        </div>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                 </div>
 
                 <div>
@@ -401,16 +413,22 @@ export default function CreateContent({ onShowProgress, onShowResults }: CreateC
                     <Label htmlFor="script-length" className="block text-sm font-medium text-gray-700 mb-2">
                       Estimated Length
                     </Label>
-                    <Select onValueChange={(value) => scriptForm.setValue("videoLength", value)}>
-                      <SelectTrigger className="border-2 border-red-500 focus:ring-red-500 focus:border-red-500" data-testid="select-script-length">
-                        <SelectValue placeholder="Select video length" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {videoLengths.map((length) => (
-                          <SelectItem key={length} value={length}>{length}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Controller
+                      name="videoLength"
+                      control={scriptForm.control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="border-2 border-red-500 focus:ring-red-500 focus:border-red-500" data-testid="select-script-length">
+                            <SelectValue placeholder="Select video length" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {videoLengths.map((length) => (
+                              <SelectItem key={length} value={length}>{length}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                     {scriptForm.formState.errors.videoLength && (
                       <p className="text-red-500 text-sm mt-1">{scriptForm.formState.errors.videoLength.message}</p>
                     )}
