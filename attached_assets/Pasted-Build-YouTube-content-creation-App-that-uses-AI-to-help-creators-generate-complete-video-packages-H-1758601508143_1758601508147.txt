@@ -1,0 +1,345 @@
+Build YouTube content creation App that uses AI to help creators generate complete video packages. Here are the main functionalities:
+🎬 Core Content Generation Features
+1. Video Script Generation
+Creates structured video scripts with hook, introduction, main content, and conclusion
+Adjustable video lengths: 75 seconds to 20 minutes and more
+Reading level optimization (6 graders level)
+The whole script must sound like written by human and not AI
+Avoid technical AI words and sentences like:
+🎬 Intro / Hook Phrases
+“Let’s dive into [topic]…”
+
+
+“Today, we’re going to uncover…”
+
+
+“Have you ever wondered why [___]?”
+
+
+“In this video, I’ll walk you through…”
+
+
+“By the end of this video, you’ll know exactly how to [___].”
+
+
+“If you’ve been struggling with [___], this is for you.”
+
+
+“So, let’s get started.”
+
+
+“Here’s what you need to know about [___]…”
+
+
+“Welcome back to another episode of [channel name]…”
+
+
+“Let’s break this down step by step.”
+
+
+
+🪄 Transition Phrases
+“Now, let’s move on to…”
+
+
+“But that’s not all…”
+
+
+“Here’s where it gets interesting…”
+
+
+“The next step is crucial…”
+
+
+“On the other hand…”
+
+
+“What does this mean for you?”
+
+
+“That brings us to the next point…”
+
+
+“Before we continue, let’s quickly recap…”
+
+
+“So far, we’ve covered [___], but there’s more…”
+
+
+“Next up, we have…”
+
+
+
+🚀 Journey / Exploration Phrases
+“Let’s embark on this journey together…”
+
+
+“We’re about to delve deeper into [___]…”
+
+
+“Think of this as your roadmap to [___]…”
+
+
+“Join me as we explore [___]…”
+
+
+“Let’s take a closer look…”
+
+
+“We’re stepping into the world of [___]…”
+
+
+“Let’s uncover the secrets behind [___]…”
+
+
+“We’re peeling back the layers of [___]…”
+
+
+“Let’s explore this step by step…”
+
+
+“Together, we’ll navigate through [___]…”
+
+
+
+💡 Explanatory Phrases
+“Here’s the deal…”
+
+
+“Simply put…”
+
+
+“In other words…”
+
+
+“The key takeaway here is…”
+
+
+“What this really means is…”
+
+
+“Here’s how it works…”
+
+
+“Let me break it down for you…”
+
+
+“At the core of this idea…”
+
+
+“Think of it like this…”
+
+
+“Here’s the simple explanation…”
+
+
+
+🎯 Engagement / Call-to-Action Phrases
+“If you’re enjoying this, don’t forget to [subscribe/like/comment].”
+
+
+“I’d love to hear your thoughts in the comments.”
+
+
+“Which one of these stands out to you?”
+
+
+“Try this out and let me know how it works.”
+
+
+“Pause this video and write down [___].”
+
+
+“Share this with someone who needs to hear it.”
+
+
+“Make sure to stick around until the end for [bonus/extra tip].”
+
+
+
+🎬 Outro / Wrap-Up Phrases
+“So there you have it…”
+
+
+“That wraps up today’s video on [___].”
+
+
+“I hope this gave you clarity on [___].”
+
+
+“Thanks for watching — I’ll see you in the next one.”
+
+
+“Keep learning, keep growing.”
+
+
+“Until next time, take care.”
+
+
+“And remember, [insert motivational closing line].”
+
+Use storytelling/script flow expressions.
+
+User must have option to  provide his own script and the app will generate the content package
+
+2. SEO Package Creation
+Generates 5 optimized video titles
+Creates compelling video descriptions
+Suggests relevant tags for better discoverability
+
+3. Thumbnail Concept Suite
+AI-generated thumbnail design concepts
+Visual style recommendations
+Text overlay suggestions
+Generate 5 “3 eye-catching, curiosity driver” words for thumbnail
+Generated 3 eye-catching, curiosity driver thumbnail generation prompts
+
+4. Production Assets
+Provide professional background music PROMPTS that goes with the Video topic.
+Provide 5 Main bullet points for the video script and 3 sub-bullet point for every Main bullet point
+🛠 Platform Features
+Image prompts Generation: User should be able to generate 2 professional eye-catching Image prompts by proving his own script. Multiple scripts can be provided at a time.
+Save and organize generated content projects
+View recent projects and content history
+User should be able to delete recent project if he wants to
+User must be able to Export and copy all generated content
+User must be able to copy each session of the output
+User must be able to select which content types to generate (script, SEO, thumbnails, assets..)
+User should be able to select video length preferences
+Responsive design for desktop and mobile
+Real-time content generation with progress tracking
+Content Temple: Generate content template for: 
+🔥 List & Countdown Style
+Top 10 [___] You Must Know
+
+
+10 Ways to [] Without []
+
+
+5 Mistakes to Avoid When [___]
+
+
+7 Secrets About [___] Nobody Tells You
+
+
+The 3 Best [___] for Beginners
+
+
+10 Tools Every [___] Needs
+
+
+Top 5 Myths About [___] Debunked
+
+
+10 Hacks to Make [___] Easier
+
+
+
+🎯 How-To & Tutorial Style
+How to [___] Step by Step
+
+
+How I [___] in [X Days/Months]
+
+
+The Easiest Way to [___] Even if You’re a Beginner
+
+
+A Beginner’s Guide to [___]
+
+
+The Ultimate Tutorial for [___]
+
+
+Learn [___] in 10 Minutes
+
+
+How to [___] Like a Pro
+
+
+From Zero to [___]: My Process
+
+
+
+💡 Problem–Solution Style
+Struggling with [___]? Try This!
+
+
+Why You’re Failing at [___] (And How to Fix It)
+
+
+The Fastest Way to Solve [___]
+
+
+Don’t Do [___] Until You Watch This
+
+
+The Best Solution for [___] Problems
+
+
+How to Stop [___] Once and for All
+
+
+What to Do If [___] Happens
+
+
+
+🚀 Transformation & Results Style
+I Tried [___] for 30 Days — Here’s What Happened
+
+
+Before and After: [___] Transformation
+
+
+My Journey from [] to []
+
+
+What Happened When I Stopped [___]
+
+
+This Changed My [___] Forever
+
+
+The Truth About [___] Nobody Shares
+
+
+[X]-Day Challenge: [___] Edition
+
+
+
+🧠 Expert & Opinion Style
+The Future of [___] in [Year]
+
+
+Is [___] Really Worth It?
+
+
+What Experts Think About [___]
+
+
+The Biggest Mistakes I Made With [___]
+
+
+Why [___] Doesn’t Work Anymore
+
+
+The Best Advice I Ever Got About [___]
+
+
+My Honest Review of [___]
+The user will fill in the blank…, and select video length and other options (script, SEO, thumbnails, assets…)
+5- 🔐 Account & Security
+Authentication
+User must be able to login in order to use the software
+Secure content access (users can only see their own projects)
+Database-backed persistence
+6- 🤖 AI Integration
+OpenAI Integration
+Powered by advanced AI models for content generation
+Structured prompts for consistent, high-quality output
+Intelligent content optimization based on video length and topic
+Have a red line around input boxes and all buttons must have RED background. 
+The layout must be RED, White, Blue and Black
+Make sure the output area is wide enough so the user can read everything correctly.
+
+The app essentially serves as a one-stop solution for YouTube creators who want to streamline their content creation process using AI assistance, from initial script writing to final production planning. Feel free to provide any suggestions. 
