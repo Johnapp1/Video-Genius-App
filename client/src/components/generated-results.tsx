@@ -68,9 +68,6 @@ export default function GeneratedResults({ projectId, onShowSection }: Generated
   });
 
   const generatedContent = project?.generatedContent as GeneratedContent | undefined;
-  
-  // Debug logging to understand data structure
-  console.log("Generated content structure:", JSON.stringify(generatedContent, null, 2));
 
   const copyToClipboard = async (content: string, sectionName: string) => {
     try {
@@ -341,18 +338,22 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
               <CardContent className="p-6">
                 <div className="prose max-w-none space-y-6">
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">{generatedContent.script.hook.title}</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      {typeof generatedContent.script.hook.title === 'string' ? generatedContent.script.hook.title : JSON.stringify(generatedContent.script.hook.title)}
+                    </h4>
                     <div className="text-gray-700 bg-gray-50 p-3 rounded" data-testid="content-script-hook">
-                      {generatedContent.script.hook.content}
+                      {typeof generatedContent.script.hook.content === 'string' ? generatedContent.script.hook.content : JSON.stringify(generatedContent.script.hook.content)}
                     </div>
                   </div>
                   
                   <Separator />
                   
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">{generatedContent.script.introduction.title}</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      {typeof generatedContent.script.introduction.title === 'string' ? generatedContent.script.introduction.title : JSON.stringify(generatedContent.script.introduction.title)}
+                    </h4>
                     <div className="text-gray-700 bg-gray-50 p-3 rounded" data-testid="content-script-intro">
-                      {generatedContent.script.introduction.content}
+                      {typeof generatedContent.script.introduction.content === 'string' ? generatedContent.script.introduction.content : JSON.stringify(generatedContent.script.introduction.content)}
                     </div>
                   </div>
                   
@@ -363,9 +364,11 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                     <div className="space-y-4" data-testid="content-script-main">
                       {generatedContent.script.mainContent.map((section, index) => (
                         <div key={index}>
-                          <h5 className="font-medium text-gray-900 mb-2">{section.title}</h5>
+                          <h5 className="font-medium text-gray-900 mb-2">
+                            {typeof section.title === 'string' ? section.title : JSON.stringify(section.title)}
+                          </h5>
                           <div className="text-gray-700 bg-gray-50 p-3 rounded">
-                            {section.content}
+                            {typeof section.content === 'string' ? section.content : JSON.stringify(section.content)}
                           </div>
                         </div>
                       ))}
@@ -375,9 +378,11 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                   <Separator />
                   
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">{generatedContent.script.conclusion.title}</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      {typeof generatedContent.script.conclusion.title === 'string' ? generatedContent.script.conclusion.title : JSON.stringify(generatedContent.script.conclusion.title)}
+                    </h4>
                     <div className="text-gray-700 bg-gray-50 p-3 rounded" data-testid="content-script-conclusion">
-                      {generatedContent.script.conclusion.content}
+                      {typeof generatedContent.script.conclusion.content === 'string' ? generatedContent.script.conclusion.content : JSON.stringify(generatedContent.script.conclusion.content)}
                     </div>
                   </div>
                   
@@ -430,7 +435,7 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                     <div className="space-y-2" data-testid="content-seo-titles">
                       {generatedContent.seo.titles.map((title, index) => (
                         <div key={index} className="p-3 bg-gray-50 rounded">
-                          {index + 1}. {title}
+                          {index + 1}. {typeof title === 'string' ? title : JSON.stringify(title)}
                         </div>
                       ))}
                     </div>
@@ -439,7 +444,7 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                   <div>
                     <h4 className="font-semibold text-gray-900 mb-3">Description</h4>
                     <div className="p-3 bg-gray-50 rounded text-sm whitespace-pre-wrap" data-testid="content-seo-description">
-                      {generatedContent.seo.description}
+                      {typeof generatedContent.seo.description === 'string' ? generatedContent.seo.description : JSON.stringify(generatedContent.seo.description)}
                     </div>
                   </div>
                   
@@ -494,7 +499,7 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                     <div className="flex flex-wrap gap-2" data-testid="content-thumbnail-words">
                       {generatedContent.thumbnails.curiosityWords.map((word, index) => (
                         <Badge key={index} className="bg-red-100 text-red-800 font-semibold">
-                          {word}
+                          {typeof word === 'string' ? word : JSON.stringify(word)}
                         </Badge>
                       ))}
                     </div>
@@ -506,8 +511,12 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                       <div className="space-y-4" data-testid="content-thumbnail-concepts">
                         {generatedContent.thumbnails.concepts.map((concept, index) => (
                           <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                            <h5 className="font-medium text-gray-900 mb-2">{concept.name}</h5>
-                            <p className="text-sm text-gray-600">{concept.description}</p>
+                            <h5 className="font-medium text-gray-900 mb-2">
+                              {typeof concept.name === 'string' ? concept.name : JSON.stringify(concept.name)}
+                            </h5>
+                            <p className="text-sm text-gray-600">
+                              {typeof concept.description === 'string' ? concept.description : JSON.stringify(concept.description)}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -520,7 +529,7 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                       <div className="space-y-3" data-testid="content-thumbnail-prompts">
                         {generatedContent.thumbnails.aiPrompts.map((prompt, index) => (
                           <div key={index} className="p-3 bg-blue-50 rounded text-sm">
-                            <strong>Prompt {index + 1}:</strong> {prompt}
+                            <strong>Prompt {index + 1}:</strong> {typeof prompt === 'string' ? prompt : JSON.stringify(prompt)}
                           </div>
                         ))}
                       </div>
@@ -573,10 +582,10 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                               <span> {prompt}</span>
                             ) : (
                               <div className="mt-2">
-                                {prompt.prompt && <div><strong>Style:</strong> {prompt.prompt}</div>}
-                                {prompt.BPM && <div><strong>BPM:</strong> {prompt.BPM}</div>}
-                                {prompt.style && <div><strong>Genre:</strong> {prompt.style}</div>}
-                                {prompt.mood && <div><strong>Mood:</strong> {prompt.mood}</div>}
+                                {prompt.prompt && <div><strong>Style:</strong> {typeof prompt.prompt === 'string' ? prompt.prompt : JSON.stringify(prompt.prompt)}</div>}
+                                {prompt.BPM && <div><strong>BPM:</strong> {typeof prompt.BPM === 'string' ? prompt.BPM : JSON.stringify(prompt.BPM)}</div>}
+                                {prompt.style && <div><strong>Genre:</strong> {typeof prompt.style === 'string' ? prompt.style : JSON.stringify(prompt.style)}</div>}
+                                {prompt.mood && <div><strong>Mood:</strong> {typeof prompt.mood === 'string' ? prompt.mood : JSON.stringify(prompt.mood)}</div>}
                               </div>
                             )}
                           </div>
@@ -591,7 +600,7 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                       <div className="space-y-3" data-testid="content-assets-images">
                         {generatedContent.assets.imagePrompts.map((prompt, index) => (
                           <div key={index} className="p-3 bg-green-50 rounded">
-                            <strong>Prompt {index + 1}:</strong> {prompt}
+                            <strong>Prompt {index + 1}:</strong> {typeof prompt === 'string' ? prompt : JSON.stringify(prompt)}
                           </div>
                         ))}
                       </div>
@@ -609,10 +618,14 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                             index === 2 ? 'border-green-500' : 
                             index === 3 ? 'border-yellow-500' : 'border-purple-500'
                           }`}>
-                            <h5 className="font-medium text-gray-900">{index + 1}. {point.title}</h5>
+                            <h5 className="font-medium text-gray-900">
+                              {index + 1}. {typeof point.title === 'string' ? point.title : JSON.stringify(point.title)}
+                            </h5>
                             <ul className="mt-2 space-y-1 text-sm text-gray-600">
                               {point.subPoints.map((subPoint, subIndex) => (
-                                <li key={subIndex}>• {subPoint}</li>
+                                <li key={subIndex}>
+                                  • {typeof subPoint === 'string' ? subPoint : JSON.stringify(subPoint)}
+                                </li>
                               ))}
                             </ul>
                           </div>
