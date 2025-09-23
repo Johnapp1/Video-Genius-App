@@ -23,6 +23,13 @@ interface GeneratedResultsProps {
   onShowSection: (section: "dashboard" | "projects") => void;
 }
 
+interface MusicPrompt {
+  prompt?: string;
+  BPM?: string;
+  style?: string;
+  mood?: string;
+}
+
 interface GeneratedContent {
   script?: {
     hook: { title: string; content: string; duration: string };
@@ -45,7 +52,7 @@ interface GeneratedContent {
     aiPrompts: string[];
   };
   assets?: {
-    musicPrompts: string[];
+    musicPrompts: (string | MusicPrompt)[];
     imagePrompts: string[];
     bulletPoints: Array<{ title: string; subPoints: string[] }>;
   };
@@ -61,6 +68,9 @@ export default function GeneratedResults({ projectId, onShowSection }: Generated
   });
 
   const generatedContent = project?.generatedContent as GeneratedContent | undefined;
+  
+  // Debug logging to understand data structure
+  console.log("Generated content structure:", JSON.stringify(generatedContent, null, 2));
 
   const copyToClipboard = async (content: string, sectionName: string) => {
     try {
@@ -142,7 +152,18 @@ ${thumbnails.aiPrompts?.map((prompt, index) => `${index + 1}. ${prompt}`).join('
     const assets = generatedContent.assets;
     const assetsContent = `
 MUSIC PROMPTS:
-${assets.musicPrompts?.map((prompt, index) => `${index + 1}. ${prompt}`).join('\n')}
+${assets.musicPrompts?.map((prompt, index) => {
+  if (typeof prompt === 'string') {
+    return `${index + 1}. ${prompt}`;
+  } else {
+    const parts = [];
+    if (prompt.prompt) parts.push(`Style: ${prompt.prompt}`);
+    if (prompt.BPM) parts.push(`BPM: ${prompt.BPM}`);
+    if (prompt.style) parts.push(`Genre: ${prompt.style}`);
+    if (prompt.mood) parts.push(`Mood: ${prompt.mood}`);
+    return `${index + 1}. ${parts.join(', ')}`;
+  }
+}).join('\n')}
 
 IMAGE PROMPTS:
 ${assets.imagePrompts?.map((prompt, index) => `${index + 1}. ${prompt}`).join('\n')}
@@ -547,7 +568,17 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                       <div className="space-y-3" data-testid="content-assets-music">
                         {generatedContent.assets.musicPrompts.map((prompt, index) => (
                           <div key={index} className="p-3 bg-gray-50 rounded">
-                            <strong>Style {index + 1}:</strong> {prompt}
+                            <strong>Style {index + 1}:</strong>
+                            {typeof prompt === 'string' ? (
+                              <span> {prompt}</span>
+                            ) : (
+                              <div className="mt-2">
+                                {prompt.prompt && <div><strong>Style:</strong> {prompt.prompt}</div>}
+                                {prompt.BPM && <div><strong>BPM:</strong> {prompt.BPM}</div>}
+                                {prompt.style && <div><strong>Genre:</strong> {prompt.style}</div>}
+                                {prompt.mood && <div><strong>Mood:</strong> {prompt.mood}</div>}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
