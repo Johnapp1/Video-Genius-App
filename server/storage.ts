@@ -1,9 +1,13 @@
-import { type User, type InsertUser, type Project, type InsertProject, type UpdateProject } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { type User, type InsertUser, type Project, type InsertProject, type UpdateProject, users, projects } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import ConnectPgSimple from "connect-pg-simple";
+import { pool } from "./db";
 
 const MemoryStore = createMemoryStore(session);
+const PgSession = ConnectPgSimple(session);
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -19,86 +23,74 @@ export interface IStorage {
   sessionStore: session.Store;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private projects: Map<string, Project>;
+export class DatabaseStorage implements IStorage {
   public sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.projects = new Map();
-    this.sessionStore = new MemoryStore({
-      checkPeriod: 86400000, // 24 hours
+    this.sessionStore = new PgSession({
+      pool: pool,
+      tableName: 'session',
+      createTableIfMissing: true,
     });
   }
 
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { 
-      ...insertUser, 
-      id, 
-      createdAt: new Date() 
-    };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async getProject(id: string): Promise<Project | undefined> {
-    return this.projects.get(id);
+    const [project] = await db.select().from(projects).where(eq(projects.id, id));
+    return project || undefined;
   }
 
   async getProjectsByUserId(userId: string): Promise<Project[]> {
-    return Array.from(this.projects.values()).filter(
-      (project) => project.userId === userId,
-    );
+    return await db.select().from(projects).where(eq(projects.userId, userId));
   }
 
   async createProject(projectData: InsertProject & { userId: string }): Promise<Project> {
-    const id = randomUUID();
-    const now = new Date();
-    const project: Project = {
-      ...projectData,
-      id,
-      createdAt: now,
-      updatedAt: now,
-      description: projectData.description || null,
-      status: projectData.status || "draft",
-      videoLength: projectData.videoLength || null,
-      contentTemplate: projectData.contentTemplate || null,
-      customScript: projectData.customScript || null,
-      generatedContent: projectData.generatedContent || null,
-      selectedContentTypes: projectData.selectedContentTypes || null,
-    };
-    this.projects.set(id, project);
+    const [project] = await db
+      .insert(projects)
+      .values({
+        ...projectData,
+        description: projectData.description || null,
+        status: projectData.status || "draft",
+        videoLength: projectData.videoLength || null,
+        contentTemplate: projectData.contentTemplate || null,
+        customScript: projectData.customScript || null,
+        generatedContent: projectData.generatedContent || null,
+        selectedContentTypes: projectData.selectedContentTypes || null,
+      })
+      .returning();
     return project;
   }
 
   async updateProject(id: string, updates: UpdateProject): Promise<Project | undefined> {
-    const project = this.projects.get(id);
-    if (!project) return undefined;
-
-    const updatedProject: Project = {
-      ...project,
-      ...updates,
-      updatedAt: new Date(),
-    };
-    this.projects.set(id, updatedProject);
-    return updatedProject;
+    const [project] = await db
+      .update(projects)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(projects.id, id))
+      .returning();
+    return project || undefined;
   }
 
   async deleteProject(id: string): Promise<boolean> {
-    return this.projects.delete(id);
+    const result = await db.delete(projects).where(eq(projects.id, id));
+    return result.rowCount > 0;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
