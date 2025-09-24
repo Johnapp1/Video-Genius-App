@@ -204,7 +204,7 @@ ${contentToAnalyze}
 
 Generate:
 1. 5 optimized video titles that are clickable and searchable
-2. A compelling video description with timestamps, keywords, and resources
+2. A compelling video description with timestamps and keywords
 3. Relevant tags for discoverability
 
 Return in JSON format:
@@ -216,9 +216,17 @@ Return in JSON format:
 
 Focus on:
 - Click-worthy titles that balance keywords with emotional hooks
-- Rich descriptions that include relevant timestamps
+- Engaging descriptions with relevant timestamps
 - Mix of broad and specific tags
 - Keywords that people actually search for
+
+DESCRIPTION REQUIREMENTS:
+- Include timestamps if applicable
+- Focus on video value and benefits to viewers
+- Use natural language and relevant keywords
+- DO NOT include "key points covered" sections
+- DO NOT include generic "resources" sections
+- Keep the description concise and engaging
 `;
 
   try {
