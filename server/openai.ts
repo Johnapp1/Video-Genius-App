@@ -239,7 +239,7 @@ ${script ? 'Consider this script content:' : 'Base concepts on the topic:'}
 ${contentToAnalyze}
 
 Generate:
-1. 5 curiosity-driven words perfect for thumbnails
+1. 5 curiosity-driven phrases (3-4 words each) perfect for thumbnails
 2. 3 detailed thumbnail design concepts with specific visual descriptions
 3. 3 AI image generation prompts for creating the thumbnails
 
@@ -247,7 +247,7 @@ Return in JSON format:
 {
   "conceptName": "Main Thumbnail Strategy",
   "description": "Overall thumbnail approach",
-  "curiosityWords": ["WORD1", "WORD2", "WORD3", "WORD4", "WORD5"],
+  "curiosityWords": ["PHRASE 1 (3-4 words)", "PHRASE 2 (3-4 words)", "PHRASE 3 (3-4 words)", "PHRASE 4 (3-4 words)", "PHRASE 5 (3-4 words)"],
   "concepts": [
     {
       "name": "Concept 1 Name",
@@ -270,7 +270,7 @@ Return in JSON format:
 }
 
 Focus on:
-- Eye-catching curiosity words that drive clicks
+- Eye-catching curiosity phrases (3-4 words each) that drive clicks
 - High-contrast, emotionally engaging designs
 - Clear, readable text overlays
 - Faces with strong emotional expressions

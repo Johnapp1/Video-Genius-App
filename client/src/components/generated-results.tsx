@@ -495,7 +495,7 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
               <CardContent className="p-6">
                 <div className="space-y-6">
                   <div>
-                    <h4 className="font-semibold text-gray-900 mb-3">Curiosity-Driven Words (5)</h4>
+                    <h4 className="font-semibold text-gray-900 mb-3">Curiosity-Driven Phrases (5)</h4>
                     <div className="flex flex-wrap gap-2" data-testid="content-thumbnail-words">
                       {generatedContent.thumbnails.curiosityWords.map((word, index) => (
                         <Badge key={index} className="bg-red-100 text-red-800 font-semibold">
