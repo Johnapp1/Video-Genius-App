@@ -91,6 +91,31 @@ export default function GeneratedResults({ projectId, onShowSection }: Generated
     }
   };
 
+  const downloadFile = (content: string, filename: string) => {
+    try {
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({
+        title: "Download Started",
+        description: `${filename} download started successfully!`,
+      });
+    } catch (error) {
+      console.error("Failed to download:", error);
+      toast({
+        title: "Download Failed",
+        description: "Unable to download file. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const copyScriptContent = () => {
     if (!generatedContent?.script) return;
     
@@ -111,6 +136,27 @@ ${script.conclusion.content}
     copyToClipboard(fullScript, "Script");
   };
 
+  const downloadScriptContent = () => {
+    if (!generatedContent?.script) return;
+    
+    const script = generatedContent.script;
+    const fullScript = `
+${script.hook.title}
+${script.hook.content}
+
+${script.introduction.title}
+${script.introduction.content}
+
+${script.mainContent.map(section => `${section.title}\n${section.content}`).join('\n\n')}
+
+${script.conclusion.title}
+${script.conclusion.content}
+    `.trim();
+    
+    const filename = `${project?.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'YouTube_Script'}_${new Date().toISOString().split('T')[0]}.txt`;
+    downloadFile(fullScript, filename);
+  };
+
   const copySEOContent = () => {
     if (!generatedContent?.seo) return;
     
@@ -129,6 +175,25 @@ ${seo.tags.join(', ')}
     copyToClipboard(seoContent, "SEO Package");
   };
 
+  const downloadSEOContent = () => {
+    if (!generatedContent?.seo) return;
+    
+    const seo = generatedContent.seo;
+    const seoContent = `
+TITLES:
+${seo.titles.map((title, index) => `${index + 1}. ${title}`).join('\n')}
+
+DESCRIPTION:
+${seo.description}
+
+TAGS:
+${seo.tags.join(', ')}
+    `.trim();
+    
+    const filename = `${project?.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'YouTube_SEO'}_${new Date().toISOString().split('T')[0]}.txt`;
+    downloadFile(seoContent, filename);
+  };
+
   const copyThumbnailContent = () => {
     if (!generatedContent?.thumbnails) return;
     
@@ -138,13 +203,44 @@ CURIOSITY WORDS:
 ${thumbnails.curiosityWords.join(', ')}
 
 DESIGN CONCEPTS:
-${thumbnails.concepts?.map((concept, index) => `${index + 1}. ${concept.name}: ${concept.description}`).join('\n')}
+${(() => {
+  const concepts = thumbnails.concepts ?? [];
+  return concepts.map((concept, index) => `${index + 1}. ${concept.name}: ${concept.description}`).join('\n');
+})()}
 
 AI GENERATION PROMPTS:
-${thumbnails.aiPrompts?.map((prompt, index) => `${index + 1}. ${prompt}`).join('\n')}
+${(() => {
+  const aiPrompts = thumbnails.aiPrompts ?? [];
+  return aiPrompts.map((prompt, index) => `${index + 1}. ${prompt}`).join('\n');
+})()}
     `.trim();
     
     copyToClipboard(thumbnailContent, "Thumbnail Concepts");
+  };
+
+  const downloadThumbnailContent = () => {
+    if (!generatedContent?.thumbnails) return;
+    
+    const thumbnails = generatedContent.thumbnails;
+    const thumbnailContent = `
+CURIOSITY WORDS:
+${thumbnails.curiosityWords.join(', ')}
+
+DESIGN CONCEPTS:
+${(() => {
+  const concepts = thumbnails.concepts ?? [];
+  return concepts.map((concept, index) => `${index + 1}. ${concept.name}: ${concept.description}`).join('\n');
+})()}
+
+AI GENERATION PROMPTS:
+${(() => {
+  const aiPrompts = thumbnails.aiPrompts ?? [];
+  return aiPrompts.map((prompt, index) => `${index + 1}. ${prompt}`).join('\n');
+})()}
+    `.trim();
+    
+    const filename = `${project?.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'YouTube_Thumbnails'}_${new Date().toISOString().split('T')[0]}.txt`;
+    downloadFile(thumbnailContent, filename);
   };
 
   const copyAssetsContent = () => {
@@ -153,35 +249,97 @@ ${thumbnails.aiPrompts?.map((prompt, index) => `${index + 1}. ${prompt}`).join('
     const assets = generatedContent.assets;
     const assetsContent = `
 MUSIC PROMPTS:
-${assets.musicPrompts?.map((prompt, index) => {
-  if (typeof prompt === 'string') {
-    return `${index + 1}. ${prompt}`;
-  } else {
-    const parts = [];
-    if (prompt.prompt) parts.push(`Style: ${prompt.prompt}`);
-    if (prompt.BPM) parts.push(`BPM: ${prompt.BPM}`);
-    if (prompt.style) parts.push(`Genre: ${prompt.style}`);
-    if (prompt.mood) parts.push(`Mood: ${prompt.mood}`);
-    return `${index + 1}. ${parts.join(', ')}`;
-  }
-}).join('\n')}
+${(() => {
+  const musicPrompts = assets.musicPrompts ?? [];
+  return musicPrompts.map((prompt, index) => {
+    if (typeof prompt === 'string') {
+      return `${index + 1}. ${prompt}`;
+    } else {
+      const parts = [];
+      if (prompt.prompt) parts.push(`Style: ${prompt.prompt}`);
+      if (prompt.BPM) parts.push(`BPM: ${prompt.BPM}`);
+      if (prompt.style) parts.push(`Genre: ${prompt.style}`);
+      if (prompt.mood) parts.push(`Mood: ${prompt.mood}`);
+      return `${index + 1}. ${parts.join(', ')}`;
+    }
+  }).join('\n');
+})()}
 
 IMAGE PROMPTS:
-${assets.imagePrompts?.map((item, index) => {
-  if (typeof item === 'string') {
-    // Legacy format
-    return `${index + 1}. ${item}`;
-  } else {
-    // New format
-    return `${item.section}:\n${item.content}\nPrompts: ${item.prompts.map((prompt, i) => `${i + 1}. ${prompt}`).join('\n')}`;
-  }
-}).join('\n\n')}
+${(() => {
+  const imagePrompts = assets.imagePrompts ?? [];
+  return imagePrompts.map((item, index) => {
+    if (typeof item === 'string') {
+      // Legacy format
+      return `${index + 1}. ${item}`;
+    } else {
+      // New format
+      return `${item.section}:\n${item.content}\nPrompts: ${item.prompts.map((prompt, i) => `${i + 1}. ${prompt}`).join('\n')}`;
+    }
+  }).join('\n\n');
+})()}
 
 BULLET POINTS:
-${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${point.subPoints.map(sub => `   • ${sub}`).join('\n')}`).join('\n\n')}
+${(() => {
+  const bulletPoints = assets.bulletPoints ?? [];
+  return bulletPoints.map((point, index) => {
+    const subPoints = point.subPoints ?? [];
+    return `${index + 1}. ${point.title}\n${subPoints.map(sub => `   • ${sub}`).join('\n')}`;
+  }).join('\n\n');
+})()}
     `.trim();
     
     copyToClipboard(assetsContent, "Production Assets");
+  };
+
+  const downloadAssetsContent = () => {
+    if (!generatedContent?.assets) return;
+    
+    const assets = generatedContent.assets;
+    const assetsContent = `
+MUSIC PROMPTS:
+${(() => {
+  const musicPrompts = assets.musicPrompts ?? [];
+  return musicPrompts.map((prompt, index) => {
+    if (typeof prompt === 'string') {
+      return `${index + 1}. ${prompt}`;
+    } else {
+      const parts = [];
+      if (prompt.prompt) parts.push(`Style: ${prompt.prompt}`);
+      if (prompt.BPM) parts.push(`BPM: ${prompt.BPM}`);
+      if (prompt.style) parts.push(`Genre: ${prompt.style}`);
+      if (prompt.mood) parts.push(`Mood: ${prompt.mood}`);
+      return `${index + 1}. ${parts.join(', ')}`;
+    }
+  }).join('\n');
+})()}
+
+IMAGE PROMPTS:
+${(() => {
+  const imagePrompts = assets.imagePrompts ?? [];
+  return imagePrompts.map((item, index) => {
+    if (typeof item === 'string') {
+      // Legacy format
+      return `${index + 1}. ${item}`;
+    } else {
+      // New format
+      return `${item.section}:\n${item.content}\nPrompts: ${item.prompts.map((prompt, i) => `${i + 1}. ${prompt}`).join('\n')}`;
+    }
+  }).join('\n\n');
+})()}
+
+BULLET POINTS:
+${(() => {
+  const bulletPoints = assets.bulletPoints ?? [];
+  return bulletPoints.map((point, index) => {
+    const subPoints = point.subPoints ?? [];
+    return `${index + 1}. ${point.title}\n${subPoints.map(sub => `   • ${sub}`).join('\n')}`;
+  }).join('\n\n');
+})()}
+    `.trim();
+    
+    const filename = `${project?.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'YouTube_Assets'}_${new Date().toISOString().split('T')[0]}.txt`;
+    downloadFile(assetsContent, filename);
   };
 
   const exportAllContent = () => {
@@ -225,7 +383,19 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
       const assets = generatedContent.assets;
       allContent += `PRODUCTION ASSETS\n${'='.repeat(20)}\n\n`;
       if (assets.musicPrompts) {
-        allContent += `MUSIC PROMPTS:\n${assets.musicPrompts.map((prompt, index) => `${index + 1}. ${prompt}`).join('\n')}\n\n`;
+        const musicPrompts = assets.musicPrompts ?? [];
+        allContent += `MUSIC PROMPTS:\n${musicPrompts.map((prompt, index) => {
+          if (typeof prompt === 'string') {
+            return `${index + 1}. ${prompt}`;
+          } else {
+            const parts = [];
+            if (prompt.prompt) parts.push(`Style: ${prompt.prompt}`);
+            if (prompt.BPM) parts.push(`BPM: ${prompt.BPM}`);
+            if (prompt.style) parts.push(`Genre: ${prompt.style}`);
+            if (prompt.mood) parts.push(`Mood: ${prompt.mood}`);
+            return `${index + 1}. ${parts.join(', ')}`;
+          }
+        }).join('\n')}\n\n`;
       }
       if (assets.imagePrompts) {
         allContent += `IMAGE PROMPTS:\n${assets.imagePrompts.map((item, index) => {
@@ -239,11 +409,16 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
         }).join('\n\n')}\n\n`;
       }
       if (assets.bulletPoints) {
-        allContent += `BULLET POINTS:\n${assets.bulletPoints.map((point, index) => `${index + 1}. ${point.title}\n${point.subPoints.map(sub => `   • ${sub}`).join('\n')}`).join('\n\n')}\n`;
+        const bulletPoints = assets.bulletPoints ?? [];
+        allContent += `BULLET POINTS:\n${bulletPoints.map((point, index) => {
+          const subPoints = point.subPoints ?? [];
+          return `${index + 1}. ${point.title}\n${subPoints.map(sub => `   • ${sub}`).join('\n')}`;
+        }).join('\n\n')}\n`;
       }
     }
 
-    copyToClipboard(allContent, "Complete Content Package");
+    const filename = `${project?.title?.replace(/[^a-zA-Z0-9]/g, '_') || 'YouTube_Content_Package'}_${new Date().toISOString().split('T')[0]}.txt`;
+    downloadFile(allContent, filename);
   };
 
   if (isLoading) {
@@ -335,24 +510,35 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                     <FileText className="mr-2" size={20} />
                     Video Script
                   </CardTitle>
-                  <Button
-                    variant="ghost"
-                    className={`text-primary hover:text-red-700 font-medium ${copiedSection === "Script" ? "text-green-600" : ""}`}
-                    onClick={copyScriptContent}
-                    data-testid="button-copy-script"
-                  >
-                    {copiedSection === "Script" ? (
-                      <>
-                        <CheckCircle className="mr-1" size={16} />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="mr-1" size={16} />
-                        Copy
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      className={`text-primary hover:text-red-700 font-medium ${copiedSection === "Script" ? "text-green-600" : ""}`}
+                      onClick={copyScriptContent}
+                      data-testid="button-copy-script"
+                    >
+                      {copiedSection === "Script" ? (
+                        <>
+                          <CheckCircle className="mr-1" size={16} />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="mr-1" size={16} />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-primary hover:text-red-700 font-medium"
+                      onClick={downloadScriptContent}
+                      data-testid="button-download-script"
+                    >
+                      <Download className="mr-1" size={16} />
+                      Download
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-6">
@@ -428,24 +614,35 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                     <Search className="mr-2" size={20} />
                     SEO Package
                   </CardTitle>
-                  <Button
-                    variant="ghost"
-                    className={`text-primary hover:text-red-700 font-medium ${copiedSection === "SEO Package" ? "text-green-600" : ""}`}
-                    onClick={copySEOContent}
-                    data-testid="button-copy-seo"
-                  >
-                    {copiedSection === "SEO Package" ? (
-                      <>
-                        <CheckCircle className="mr-1" size={16} />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="mr-1" size={16} />
-                        Copy
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      className={`text-primary hover:text-red-700 font-medium ${copiedSection === "SEO Package" ? "text-green-600" : ""}`}
+                      onClick={copySEOContent}
+                      data-testid="button-copy-seo"
+                    >
+                      {copiedSection === "SEO Package" ? (
+                        <>
+                          <CheckCircle className="mr-1" size={16} />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="mr-1" size={16} />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-primary hover:text-red-700 font-medium"
+                      onClick={downloadSEOContent}
+                      data-testid="button-download-seo"
+                    >
+                      <Download className="mr-1" size={16} />
+                      Download
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-6">
@@ -492,24 +689,35 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                     <Image className="mr-2" size={20} />
                     Thumbnail Concepts
                   </CardTitle>
-                  <Button
-                    variant="ghost"
-                    className={`text-primary hover:text-red-700 font-medium ${copiedSection === "Thumbnail Concepts" ? "text-green-600" : ""}`}
-                    onClick={copyThumbnailContent}
-                    data-testid="button-copy-thumbnails"
-                  >
-                    {copiedSection === "Thumbnail Concepts" ? (
-                      <>
-                        <CheckCircle className="mr-1" size={16} />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="mr-1" size={16} />
-                        Copy
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      className={`text-primary hover:text-red-700 font-medium ${copiedSection === "Thumbnail Concepts" ? "text-green-600" : ""}`}
+                      onClick={copyThumbnailContent}
+                      data-testid="button-copy-thumbnails"
+                    >
+                      {copiedSection === "Thumbnail Concepts" ? (
+                        <>
+                          <CheckCircle className="mr-1" size={16} />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="mr-1" size={16} />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-primary hover:text-red-700 font-medium"
+                      onClick={downloadThumbnailContent}
+                      data-testid="button-download-thumbnails"
+                    >
+                      <Download className="mr-1" size={16} />
+                      Download
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-6">
@@ -569,24 +777,35 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                     <Music className="mr-2" size={20} />
                     Production Assets
                   </CardTitle>
-                  <Button
-                    variant="ghost"
-                    className={`text-primary hover:text-red-700 font-medium ${copiedSection === "Production Assets" ? "text-green-600" : ""}`}
-                    onClick={copyAssetsContent}
-                    data-testid="button-copy-assets"
-                  >
-                    {copiedSection === "Production Assets" ? (
-                      <>
-                        <CheckCircle className="mr-1" size={16} />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="mr-1" size={16} />
-                        Copy
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      className={`text-primary hover:text-red-700 font-medium ${copiedSection === "Production Assets" ? "text-green-600" : ""}`}
+                      onClick={copyAssetsContent}
+                      data-testid="button-copy-assets"
+                    >
+                      {copiedSection === "Production Assets" ? (
+                        <>
+                          <CheckCircle className="mr-1" size={16} />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="mr-1" size={16} />
+                          Copy
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-primary hover:text-red-700 font-medium"
+                      onClick={downloadAssetsContent}
+                      data-testid="button-download-assets"
+                    >
+                      <Download className="mr-1" size={16} />
+                      Download
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-6">
