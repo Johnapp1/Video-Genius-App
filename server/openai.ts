@@ -35,7 +35,6 @@ interface ThumbnailConcept {
 
 interface ProductionAssets {
   musicPrompts: string[];
-  imagePrompts: string[];
   bulletPoints: {
     title: string;
     subPoints: string[];
@@ -46,7 +45,13 @@ interface GeneratedContent {
   script?: GeneratedScript;
   seo?: SEOPackage;
   thumbnails?: ThumbnailConcept;
-  assets?: ProductionAssets;
+  assets?: ProductionAssets & {
+    imagePrompts?: Array<{
+      section: string;
+      content: string;
+      prompts: string[];
+    }>;
+  };
 }
 
 const AVOIDED_PHRASES = [
@@ -311,18 +316,13 @@ ${contentToAnalyze}
 
 Generate:
 1. Professional background music prompts (2-3 options)
-2. Image prompts for visual content (2 prompts based on script paragraphs)
-3. Main bullet points with sub-bullet points (5 main points, 3 sub-points each)
+2. Main bullet points with sub-bullet points (5 main points, 3 sub-points each)
 
 Return in JSON format:
 {
   "musicPrompts": [
     "Detailed music prompt 1 with BPM, style, mood",
     "Detailed music prompt 2 with BPM, style, mood"
-  ],
-  "imagePrompts": [
-    "Professional image prompt 1 for visual content",
-    "Professional image prompt 2 for visual content"
   ],
   "bulletPoints": [
     {
@@ -350,7 +350,6 @@ Return in JSON format:
 
 Focus on:
 - Music that matches the content tone and energy
-- Professional, eye-catching image concepts
 - Clear, actionable bullet points that summarize key content
 `;
 
@@ -376,50 +375,141 @@ Focus on:
   }
 }
 
-export async function generateImagePrompts(script: string, videoLength: string): Promise<string[]> {
-  const targetPrompts = videoLength === "75 seconds (Short)" ? 1 : 2;
+export async function generateImagePromptsFromRawScript(rawScript: string): Promise<Array<{section: string; content: string; prompts: string[]}>> {
+  // Split the raw script into paragraphs for image prompt generation
+  const paragraphs = rawScript
+    .split('\n\n')
+    .map(p => p.trim())
+    .filter(p => p.length > 0);
   
-  const prompt = `
-Analyze this video script and generate ${targetPrompts} professional image prompt(s) for visual content:
+  const results = [];
+  
+  for (let i = 0; i < paragraphs.length; i++) {
+    const paragraph = paragraphs[i];
+    const sectionName = `Paragraph ${i + 1}`;
+    
+    const prompt = `
+Analyze this paragraph from a video script and generate 1-2 professional image prompts based on the specific content:
 
-SCRIPT:
-${script}
+PARAGRAPH: ${sectionName}
+CONTENT: ${paragraph}
 
-Create specific, detailed prompts for generating images that would enhance this video content. Focus on:
-- Professional, eye-catching visuals
-- Images that support key concepts in the script
-- High-quality, suitable for video thumbnails or content illustrations
+Create specific, detailed prompts for generating images that would enhance this specific paragraph. Focus on:
+- Professional, eye-catching visuals that match the paragraph content
+- Images that support the key concepts mentioned in this paragraph
+- High-quality, suitable for video content or thumbnails
 
 Return in JSON format:
 {
   "imagePrompts": [
-    "Detailed professional image prompt 1",
-    "Detailed professional image prompt 2"
+    "Detailed professional image prompt 1 based on this paragraph",
+    "Detailed professional image prompt 2 based on this paragraph (optional)"
   ]
 }
 `;
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
-      messages: [
-        {
-          role: "system",
-          content: "You are an expert at creating detailed image generation prompts for video content."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-    });
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert at creating detailed image generation prompts for video content based on specific paragraphs."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+      });
 
-    const result = JSON.parse(response.choices[0].message.content || "{}");
-    return result.imagePrompts || [];
-  } catch (error) {
-    throw new Error("Failed to generate image prompts: " + (error as Error).message);
+      const result = JSON.parse(response.choices[0].message.content || "{}");
+      results.push({
+        section: sectionName,
+        content: paragraph,
+        prompts: result.imagePrompts || []
+      });
+    } catch (error) {
+      console.error(`Failed to generate image prompts for ${sectionName}:`, error);
+      results.push({
+        section: sectionName,
+        content: paragraph,
+        prompts: []
+      });
+    }
   }
+
+  return results;
+}
+
+export async function generateImagePrompts(parsedScript: GeneratedScript): Promise<Array<{section: string; content: string; prompts: string[]}>> {
+  const sections = [
+    { name: "Hook", content: parsedScript.hook.content },
+    { name: "Introduction", content: parsedScript.introduction.content },
+    ...parsedScript.mainContent.map((section, index) => ({ 
+      name: `Main Content ${index + 1}`, 
+      content: section.content 
+    })),
+    { name: "Conclusion", content: parsedScript.conclusion.content }
+  ];
+
+  const results = [];
+  
+  for (const section of sections) {
+    const prompt = `
+Analyze this paragraph from a video script and generate 1-2 professional image prompts based on the specific content:
+
+PARAGRAPH: ${section.name}
+CONTENT: ${section.content}
+
+Create specific, detailed prompts for generating images that would enhance this specific paragraph. Focus on:
+- Professional, eye-catching visuals that match the paragraph content
+- Images that support the key concepts mentioned in this paragraph
+- High-quality, suitable for video content or thumbnails
+
+Return in JSON format:
+{
+  "imagePrompts": [
+    "Detailed professional image prompt 1 based on this paragraph",
+    "Detailed professional image prompt 2 based on this paragraph (optional)"
+  ]
+}
+`;
+
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "You are an expert at creating detailed image generation prompts for video content based on specific paragraphs."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const result = JSON.parse(response.choices[0].message.content || "{}");
+      results.push({
+        section: section.name,
+        content: section.content,
+        prompts: result.imagePrompts || []
+      });
+    } catch (error) {
+      console.error(`Failed to generate image prompts for ${section.name}:`, error);
+      results.push({
+        section: section.name,
+        content: section.content,
+        prompts: []
+      });
+    }
+  }
+
+  return results;
 }
 
 export async function generateCompleteContent(
@@ -459,10 +549,31 @@ export async function generateCompleteContent(
       );
     }
 
+    if (selectedContentTypes.includes("imagePrompts")) {
+      promises.push(
+        (() => {
+          if (content.script) {
+            // Use structured script if available
+            return generateImagePrompts(content.script);
+          } else {
+            // Fallback to raw script analysis
+            return generateImagePromptsFromRawScript(scriptText || topic);
+          }
+        })().then(prompts => {
+          if (!content.assets) content.assets = { musicPrompts: [], bulletPoints: [] };
+          content.assets.imagePrompts = prompts;
+        })
+      );
+    }
+
     if (selectedContentTypes.includes("assets") || selectedContentTypes.includes("music") || selectedContentTypes.includes("bulletPoints")) {
       promises.push(
         generateProductionAssets(topic, scriptText, videoLength).then(assets => {
-          content.assets = assets;
+          if (content.assets) {
+            content.assets = { ...content.assets, ...assets };
+          } else {
+            content.assets = assets;
+          }
         })
       );
     }
@@ -505,8 +616,9 @@ export async function generateContentFromScript(
 
     if (selectedContentTypes.includes("imagePrompts")) {
       promises.push(
-        generateImagePrompts(script, videoLength).then(prompts => {
-          if (!content.assets) content.assets = { musicPrompts: [], imagePrompts: [], bulletPoints: [] };
+        generateImagePromptsFromRawScript(script).then(prompts => {
+          if (!content.assets) content.assets = { musicPrompts: [], bulletPoints: [] };
+          if (!content.assets.imagePrompts) content.assets.imagePrompts = [];
           content.assets.imagePrompts = prompts;
         })
       );

@@ -53,7 +53,11 @@ interface GeneratedContent {
   };
   assets?: {
     musicPrompts: (string | MusicPrompt)[];
-    imagePrompts: string[];
+    imagePrompts: Array<{
+      section: string;
+      content: string;
+      prompts: string[];
+    }>;
     bulletPoints: Array<{ title: string; subPoints: string[] }>;
   };
 }
@@ -163,7 +167,15 @@ ${assets.musicPrompts?.map((prompt, index) => {
 }).join('\n')}
 
 IMAGE PROMPTS:
-${assets.imagePrompts?.map((prompt, index) => `${index + 1}. ${prompt}`).join('\n')}
+${assets.imagePrompts?.map((item, index) => {
+  if (typeof item === 'string') {
+    // Legacy format
+    return `${index + 1}. ${item}`;
+  } else {
+    // New format
+    return `${item.section}:\n${item.content}\nPrompts: ${item.prompts.map((prompt, i) => `${i + 1}. ${prompt}`).join('\n')}`;
+  }
+}).join('\n\n')}
 
 BULLET POINTS:
 ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${point.subPoints.map(sub => `   • ${sub}`).join('\n')}`).join('\n\n')}
@@ -216,7 +228,15 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
         allContent += `MUSIC PROMPTS:\n${assets.musicPrompts.map((prompt, index) => `${index + 1}. ${prompt}`).join('\n')}\n\n`;
       }
       if (assets.imagePrompts) {
-        allContent += `IMAGE PROMPTS:\n${assets.imagePrompts.map((prompt, index) => `${index + 1}. ${prompt}`).join('\n')}\n\n`;
+        allContent += `IMAGE PROMPTS:\n${assets.imagePrompts.map((item, index) => {
+          if (typeof item === 'string') {
+            // Legacy format
+            return `${index + 1}. ${item}`;
+          } else {
+            // New format
+            return `${item.section}:\n${item.content}\nPrompts: ${item.prompts.map((prompt, i) => `${i + 1}. ${prompt}`).join('\n')}`;
+          }
+        }).join('\n\n')}\n\n`;
       }
       if (assets.bulletPoints) {
         allContent += `BULLET POINTS:\n${assets.bulletPoints.map((point, index) => `${index + 1}. ${point.title}\n${point.subPoints.map(sub => `   • ${sub}`).join('\n')}`).join('\n\n')}\n`;
@@ -596,13 +616,40 @@ ${assets.bulletPoints?.map((point, index) => `${index + 1}. ${point.title}\n${po
                   
                   {generatedContent.assets.imagePrompts && (
                     <div>
-                      <h4 className="font-semibold text-gray-900 mb-3">Image Prompts</h4>
-                      <div className="space-y-3" data-testid="content-assets-images">
-                        {generatedContent.assets.imagePrompts.map((prompt, index) => (
-                          <div key={index} className="p-3 bg-green-50 rounded">
-                            <strong>Prompt {index + 1}:</strong> {typeof prompt === 'string' ? prompt : JSON.stringify(prompt)}
-                          </div>
-                        ))}
+                      <h4 className="font-semibold text-gray-900 mb-3">Image Prompts {Array.isArray(generatedContent.assets.imagePrompts) && generatedContent.assets.imagePrompts.length > 0 && typeof generatedContent.assets.imagePrompts[0] === 'object' ? '(By Paragraph)' : ''}</h4>
+                      <div className="space-y-6" data-testid="content-assets-images">
+                        {generatedContent.assets.imagePrompts.map((item, index) => {
+                          // Handle legacy format (string array) vs new format (object array)
+                          if (typeof item === 'string') {
+                            // Legacy format - display as simple prompts
+                            return (
+                              <div key={index} className="p-3 bg-green-50 rounded border-l-4 border-green-400">
+                                <strong>Prompt {index + 1}:</strong> {item}
+                              </div>
+                            );
+                          } else {
+                            // New format - display with paragraph context
+                            return (
+                              <div key={index} className="border border-gray-200 rounded-lg p-4">
+                                <div className="mb-3">
+                                  <h5 className="font-medium text-gray-900 mb-2">{item.section}</h5>
+                                  <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded mb-3">
+                                    <strong>Paragraph Content:</strong>
+                                    <p className="mt-1">{typeof item.content === 'string' ? item.content : JSON.stringify(item.content)}</p>
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <h6 className="font-medium text-gray-800">Generated Image Prompts:</h6>
+                                  {item.prompts && item.prompts.map((prompt, promptIndex) => (
+                                    <div key={promptIndex} className="p-3 bg-green-50 rounded border-l-4 border-green-400">
+                                      <strong>Prompt {promptIndex + 1}:</strong> {typeof prompt === 'string' ? prompt : JSON.stringify(prompt)}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          }
+                        })}
                       </div>
                     </div>
                   )}
