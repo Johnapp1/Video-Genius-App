@@ -115,8 +115,10 @@ export async function generateScript(topic: string, videoLength: string, templat
 Create a detailed YouTube video script about "${topic}" with the following requirements:
 
 LENGTH: Target ${targetWords} words total (approximately ${durationMinutes} minutes)
-READING LEVEL: 6th grade level - use simple, clear language
-TONE: Human-like, conversational, engaging - NOT robotic or AI-sounding
+READING LEVEL: 6th grade level - use simple, clear language that anyone can understand
+TONE: Professional, engaging, and conversational - like talking to a friend who trusts your expertise
+VOCABULARY: Use common words, short sentences, and avoid jargon or complex terms
+ENGAGEMENT: Include questions, personal stories, relatable examples, and direct audience address
 
 ${templateInstruction}
 
@@ -159,7 +161,14 @@ Return the response in JSON format with this structure:
   "estimatedDuration": "X minutes Y seconds"
 }
 
-Make the script sound like it was written by a real person, not AI. Use personal anecdotes, contractions, and natural speech patterns.
+QUALITY REQUIREMENTS:
+- Write as if a real person is speaking naturally, not reading from a script
+- Use contractions (you're, don't, can't) and casual language appropriately
+- Include personal touches like "I've found that..." or "Here's what worked for me..."
+- Ask rhetorical questions to keep viewers engaged
+- Use simple transitions like "Now," "Next," "But here's the thing"
+- Keep sentences short and punchy for easy comprehension
+- Maintain professional credibility while being approachable and relatable
 `;
 
   try {
