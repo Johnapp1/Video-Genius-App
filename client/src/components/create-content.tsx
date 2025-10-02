@@ -25,6 +25,7 @@ const aiGenerateSchema = z.object({
   topic: z.string().min(1, "Topic is required"),
   videoLength: z.string().min(1, "Video length is required"),
   contentTemplate: z.string().optional(),
+  tone: z.string().min(1, "Tone is required"),
   selectedContentTypes: z.array(z.string()).min(1, "Select at least one content type"),
 });
 
@@ -32,6 +33,7 @@ const uploadScriptSchema = z.object({
   title: z.string().min(1, "Title is required"),
   script: z.string().min(1, "Script is required"),
   videoLength: z.string().min(1, "Video length is required"),
+  tone: z.string().min(1, "Tone is required"),
   selectedContentTypes: z.array(z.string()).min(1, "Select at least one content type"),
 });
 
@@ -53,6 +55,16 @@ const videoLengths = [
   "8-12 minutes (Extended)",
   "15-20 minutes (Deep Dive)",
   "20+ minutes (Comprehensive)",
+];
+
+const toneOptions = [
+  { value: "informative", label: "Informative/Professional", description: "Clear, accurate information with expert delivery" },
+  { value: "casual", label: "Casual/Conversational", description: "Friendly and approachable with natural speaking style" },
+  { value: "comedic", label: "Comedic", description: "Jokes, witty remarks, and entertaining style" },
+  { value: "storytelling", label: "Storytelling", description: "Narrative structure with emotional engagement" },
+  { value: "persuasive", label: "Persuasive", description: "Convincing approach for reviews and opinions" },
+  { value: "empathetic", label: "Sensitive/Empathetic", description: "Sympathetic approach for emotional topics" },
+  { value: "experimental", label: "Experimental", description: "Unique styles and unconventional structures" },
 ];
 
 const templates = [
@@ -286,6 +298,36 @@ export default function CreateContent({ onShowProgress, onShowResults }: CreateC
                       <p className="text-red-500 text-sm mt-1">{aiForm.formState.errors.videoLength.message}</p>
                     )}
                   </div>
+
+                  <div>
+                    <Label htmlFor="ai-tone" className="block text-sm font-medium text-gray-700 mb-2">
+                      Script Tone
+                    </Label>
+                    <Controller
+                      name="tone"
+                      control={aiForm.control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="border-2 border-red-500 focus:ring-red-500 focus:border-red-500" data-testid="select-tone">
+                            <SelectValue placeholder="Select script tone" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {toneOptions.map((tone) => (
+                              <SelectItem key={tone.value} value={tone.value}>
+                                <div>
+                                  <div className="font-medium">{tone.label}</div>
+                                  <div className="text-xs text-gray-500">{tone.description}</div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {aiForm.formState.errors.tone && (
+                      <p className="text-red-500 text-sm mt-1">{aiForm.formState.errors.tone.message}</p>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -431,6 +473,36 @@ export default function CreateContent({ onShowProgress, onShowResults }: CreateC
                     />
                     {scriptForm.formState.errors.videoLength && (
                       <p className="text-red-500 text-sm mt-1">{scriptForm.formState.errors.videoLength.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="script-tone" className="block text-sm font-medium text-gray-700 mb-2">
+                      Script Tone
+                    </Label>
+                    <Controller
+                      name="tone"
+                      control={scriptForm.control}
+                      render={({ field }) => (
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="border-2 border-red-500 focus:ring-red-500 focus:border-red-500" data-testid="select-script-tone">
+                            <SelectValue placeholder="Select script tone" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {toneOptions.map((tone) => (
+                              <SelectItem key={tone.value} value={tone.value}>
+                                <div>
+                                  <div className="font-medium">{tone.label}</div>
+                                  <div className="text-xs text-gray-500">{tone.description}</div>
+                                </div>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {scriptForm.formState.errors.tone && (
+                      <p className="text-red-500 text-sm mt-1">{scriptForm.formState.errors.tone.message}</p>
                     )}
                   </div>
                 </div>

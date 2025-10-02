@@ -20,6 +20,7 @@ export const projects = pgTable("projects", {
   videoLength: text("video_length"),
   contentTemplate: text("content_template"),
   customScript: text("custom_script"),
+  tone: text("tone").notNull().default("informative"), // tone of the script
   generatedContent: json("generated_content"), // stores all AI generated content
   selectedContentTypes: json("selected_content_types"), // array of content types to generate
   createdAt: timestamp("created_at").defaultNow(),
@@ -51,6 +52,7 @@ export const generateContentSchema = z.object({
   topic: z.string().min(1, "Topic is required"),
   videoLength: z.string(),
   contentTemplate: z.string().optional(),
+  tone: z.string().default("informative"),
   selectedContentTypes: z.array(z.string()),
 });
 
@@ -58,6 +60,7 @@ export const uploadScriptSchema = z.object({
   title: z.string().min(1, "Title is required"),
   script: z.string().min(1, "Script is required"),
   videoLength: z.string(),
+  tone: z.string().default("informative"),
   selectedContentTypes: z.array(z.string()),
 });
 
