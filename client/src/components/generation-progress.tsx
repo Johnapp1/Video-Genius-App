@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Wand2, CheckCircle, Loader2, Search, Image, Music } from "lucide-react";
+import { Wand2, CheckCircle, Loader2, Search, Image, Music, PartyPopper } from "lucide-react";
 
 interface GenerationProgressProps {
   onShowResults: () => void;
@@ -17,6 +18,7 @@ interface ProgressStep {
 export default function GenerationProgress({ onShowResults, projectId }: GenerationProgressProps) {
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
   
   const [steps, setSteps] = useState<ProgressStep[]>([
     {
@@ -57,7 +59,7 @@ export default function GenerationProgress({ onShowResults, projectId }: Generat
       setProgress(prev => {
         if (prev >= 100) {
           clearInterval(progressTimer);
-          setTimeout(() => onShowResults(), 1000);
+          setTimeout(() => setIsComplete(true), 1000);
           return 100;
         }
         return prev + 20;
@@ -146,6 +148,36 @@ export default function GenerationProgress({ onShowResults, projectId }: Generat
         return "text-gray-400";
     }
   };
+
+  if (isComplete) {
+    return (
+      <div className="p-6">
+        <div className="max-w-4xl mx-auto">
+          <Card className="border border-gray-200">
+            <CardContent className="p-12">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <PartyPopper className="text-green-600" size={40} data-testid="icon-success" />
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-3">Content Generated Successfully!</h2>
+                <p className="text-gray-600 mb-8 text-lg">
+                  Your AI-powered YouTube content package is ready to view. All your scripts, SEO optimization, thumbnails, and production assets have been created.
+                </p>
+                <Button 
+                  onClick={onShowResults}
+                  className="bg-primary text-white hover:bg-red-700 px-8 py-6 text-lg font-semibold transition-colors"
+                  data-testid="button-view-content"
+                >
+                  <CheckCircle className="mr-2" size={20} />
+                  View Your Content
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
