@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Wand2, CheckCircle, Loader2, Search, Image, Music, PartyPopper } from "lucide-react";
 
 interface GenerationProgressProps {
-  onShowResults: () => void;
+  onShowResults: (projectId?: string) => void;
   projectId: string | null;
 }
 
@@ -164,13 +164,17 @@ export default function GenerationProgress({ onShowResults, projectId }: Generat
                   Your AI-powered YouTube content package is ready to view. All your scripts, SEO optimization, thumbnails, and production assets have been created.
                 </p>
                 <Button 
-                  onClick={onShowResults}
+                  onClick={() => onShowResults()}
                   className="bg-primary text-white hover:bg-red-700 px-8 py-6 text-lg font-semibold transition-colors"
                   data-testid="button-view-content"
+                  disabled={!projectId}
                 >
                   <CheckCircle className="mr-2" size={20} />
                   View Your Content
                 </Button>
+                {!projectId && (
+                  <p className="text-sm text-gray-500 mt-4">Waiting for content generation to complete...</p>
+                )}
               </div>
             </CardContent>
           </Card>
