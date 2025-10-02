@@ -103,7 +103,20 @@ function getTargetWords(videoLength: string): number {
   return Math.round(minutes * 150); // 150 words per minute speaking rate
 }
 
-export async function generateScript(topic: string, videoLength: string, template?: string): Promise<GeneratedScript> {
+function getToneInstructions(tone: string): string {
+  const toneMap: Record<string, string> = {
+    informative: "Professional and clear. Focus on accurate information with an expert delivery. Use precise language while staying accessible. Maintain credibility and authority throughout.",
+    casual: "Friendly and conversational. Use contractions freely (you're, don't, can't). Talk like you're chatting with a friend. Include humor naturally. Keep it relaxed and approachable.",
+    comedic: "Funny and entertaining. Include jokes, witty remarks, and humorous observations. Use comedic timing with setup and punchline structure. Make viewers laugh while delivering value.",
+    storytelling: "Narrative-driven and emotional. Build a compelling story arc with character, conflict, and resolution. Create emotional connections. Use vivid imagery and sensory details.",
+    persuasive: "Convincing and compelling. Present clear arguments with supporting evidence. Address objections. Build to a strong conclusion that motivates action. Use rhetorical devices effectively.",
+    empathetic: "Warm and understanding. Use 'we' language to create connection. Acknowledge difficulties and emotions. Avoid harsh or judgmental language. Show genuine care and support.",
+    experimental: "Unique and unconventional. Break traditional structures. Try innovative approaches. Challenge expectations. Create memorable, distinctive content that stands out."
+  };
+  return toneMap[tone] || toneMap.informative;
+}
+
+export async function generateScript(topic: string, videoLength: string, tone: string = "informative", template?: string): Promise<GeneratedScript> {
   const targetWords = getTargetWords(videoLength);
   const durationMinutes = getDurationInMinutes(videoLength);
   
@@ -111,12 +124,14 @@ export async function generateScript(topic: string, videoLength: string, templat
     `Use this content template structure: "${template}". Fill in the blanks with relevant information about the topic.` : 
     "Create an engaging and informative script structure.";
 
+  const toneInstruction = getToneInstructions(tone);
+
   const prompt = `
-Create a detailed YouTube video script about "${topic}" with the following requirements:
+Create a WORLD-CLASS YouTube video script about "${topic}" with the following requirements:
 
 LENGTH: Target ${targetWords} words total (approximately ${durationMinutes} minutes)
 READING LEVEL: 6th grade level - use simple, clear language that anyone can understand
-TONE: Professional, engaging, and conversational - like talking to a friend who trusts your expertise
+TONE: ${toneInstruction}
 VOCABULARY: Use common words, short sentences, and avoid jargon or complex terms
 ENGAGEMENT: Include questions, personal stories, relatable examples, and direct audience address
 
@@ -128,10 +143,10 @@ ${AVOIDED_PHRASES.join(", ")}
 Instead, use natural conversational starters, storytelling elements, and human-like transitions.
 
 Structure the script with these sections:
-1. HOOK (0-5 seconds): Attention-grabbing opener that creates curiosity
-2. INTRODUCTION (5-30 seconds): Brief personal introduction and video preview
-3. MAIN CONTENT: The core teaching/entertainment content broken into logical sections
-4. CONCLUSION: Summary and strong call-to-action
+1. HOOK (0-5 seconds): MUST be INCREDIBLY attention-grabbing. Use pattern interrupts, shocking facts, bold questions, or compelling teasers. This is THE MOST CRITICAL 5 SECONDS.
+2. INTRODUCTION (5-30 seconds): Build credibility and preview the value. Make viewers excited to stay.
+3. MAIN CONTENT: The core teaching/entertainment content broken into logical sections with smooth transitions
+4. CONCLUSION: Powerful summary with an irresistible call-to-action that drives engagement
 
 Return the response in JSON format with this structure:
 {
@@ -532,6 +547,7 @@ Return in JSON format:
 export async function generateCompleteContent(
   topic: string,
   videoLength: string,
+  tone: string = "informative",
   template: string | undefined,
   selectedContentTypes: string[]
 ): Promise<GeneratedContent> {
@@ -540,7 +556,7 @@ export async function generateCompleteContent(
   try {
     // Generate script first if requested
     if (selectedContentTypes.includes("script")) {
-      content.script = await generateScript(topic, videoLength, template);
+      content.script = await generateScript(topic, videoLength, tone, template);
     }
 
     const scriptText = content.script ? 
@@ -608,6 +624,7 @@ export async function generateContentFromScript(
   title: string,
   script: string,
   videoLength: string,
+  tone: string = "informative",
   selectedContentTypes: string[]
 ): Promise<GeneratedContent> {
   const content: GeneratedContent = {};

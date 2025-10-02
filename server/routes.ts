@@ -101,7 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
     try {
-      const { topic, videoLength, contentTemplate, selectedContentTypes } = generateContentSchema.parse(req.body);
+      const { topic, videoLength, contentTemplate, tone, selectedContentTypes } = generateContentSchema.parse(req.body);
       
       // Create project first
       const project = await storage.createProject({
@@ -111,6 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         workflow: "ai-generate",
         videoLength,
         contentTemplate,
+        tone,
         selectedContentTypes,
         userId: req.user!.id,
       });
@@ -119,6 +120,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const generatedContent = await generateCompleteContent(
         topic,
         videoLength,
+        tone,
         contentTemplate,
         selectedContentTypes
       );
@@ -140,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!req.isAuthenticated()) return res.sendStatus(401);
     
     try {
-      const { title, script, videoLength, selectedContentTypes } = uploadScriptSchema.parse(req.body);
+      const { title, script, videoLength, tone, selectedContentTypes } = uploadScriptSchema.parse(req.body);
       
       // Create project first
       const project = await storage.createProject({
@@ -150,6 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         workflow: "upload-script",
         videoLength,
         customScript: script,
+        tone,
         selectedContentTypes,
         userId: req.user!.id,
       });
@@ -159,6 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title,
         script,
         videoLength,
+        tone,
         selectedContentTypes
       );
 
