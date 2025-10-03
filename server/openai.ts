@@ -137,9 +137,16 @@ export async function generateScript(topic: string, videoLength: string, tone: s
   let quantityInstruction = "";
   if (requestedQuantity) {
     if (isQAFormat) {
-      quantityInstruction = `\nCRITICAL: The user specifically requested ${requestedQuantity} question and answer pairs. You MUST generate EXACTLY ${requestedQuantity} items in the mainContent array. Each item should have a question as the title and the answer as the content.`;
+      quantityInstruction = `\nCRITICAL: The user specifically requested ${requestedQuantity} question and answer pairs. You MUST generate EXACTLY ${requestedQuantity} SEPARATE items in the mainContent array. 
+
+IMPORTANT FORMAT RULES:
+- Each question MUST be its own separate item in the array
+- Do NOT group questions (e.g., "Questions 3 through 7" is WRONG)
+- Each item should be numbered individually: "Question 1", "Question 2", "Question 3", etc.
+- Each question gets its own complete answer in the content field
+- You need ${requestedQuantity} separate array items, numbered from 1 to ${requestedQuantity}`;
     } else {
-      quantityInstruction = `\nCRITICAL: The user specifically requested ${requestedQuantity} items. You MUST generate EXACTLY ${requestedQuantity} items in the mainContent array.`;
+      quantityInstruction = `\nCRITICAL: The user specifically requested ${requestedQuantity} items. You MUST generate EXACTLY ${requestedQuantity} SEPARATE items in the mainContent array. Each item should be numbered individually (Item 1, Item 2, etc.). Do NOT group items together.`;
     }
   }
 
@@ -178,12 +185,24 @@ Return the response in JSON format with this structure:
     "content": "script content",
     "duration": "5-30 seconds"
   },
-  "mainContent": [
+  "mainContent": [${isQAFormat && requestedQuantity ? `
     {
-      "title": "${isQAFormat ? 'Question text' : 'Section title'}",
-      "content": "${isQAFormat ? 'Answer text' : 'script content'}",
+      "title": "Question 1: [actual question text]",
+      "content": "[complete answer to question 1]",
       "duration": "estimated duration"
-    }${requestedQuantity ? ` // MUST have exactly ${requestedQuantity} items in this array` : ""}
+    },
+    {
+      "title": "Question 2: [actual question text]",
+      "content": "[complete answer to question 2]",
+      "duration": "estimated duration"
+    }
+    // ... continue with Question 3, Question 4, etc. up to Question ${requestedQuantity}
+    // Each question MUST be separate - DO NOT group them` : `
+    {
+      "title": "${isQAFormat ? 'Question 1: [actual question text]' : 'Section title'}",
+      "content": "${isQAFormat ? '[complete answer]' : 'script content'}",
+      "duration": "estimated duration"
+    }${requestedQuantity ? ` // MUST have exactly ${requestedQuantity} separate items in this array` : ""}`}
   ],
   "conclusion": {
     "title": "Conclusion & CTA",
@@ -234,11 +253,16 @@ QUALITY REQUIREMENTS:
           messages: [
             {
               role: "system",
-              content: "You are an expert YouTube scriptwriter. You MUST generate the EXACT number of items requested by the user. This is CRITICAL."
+              content: "You are an expert YouTube scriptwriter. You MUST generate the EXACT number of items requested by the user. This is CRITICAL. Each item must be SEPARATE - never group them together."
             },
             {
               role: "user",
-              content: prompt + `\n\nIMPORTANT: You previously generated ${actualCount} items but the user needs EXACTLY ${requestedQuantity}. Generate ${requestedQuantity} complete items.`
+              content: prompt + `\n\nIMPORTANT: You previously generated ${actualCount} items but the user needs EXACTLY ${requestedQuantity} SEPARATE items. 
+              
+DO NOT GROUP ITEMS! Each item must be individual:
+${isQAFormat ? `- Question 1: [question] with answer\n- Question 2: [question] with answer\n- Question 3: [question] with answer\n... up to Question ${requestedQuantity}` : `- Item 1\n- Item 2\n- Item 3\n... up to Item ${requestedQuantity}`}
+
+Generate ${requestedQuantity} complete, separate items now.`
             }
           ],
           response_format: { type: "json_object" },
