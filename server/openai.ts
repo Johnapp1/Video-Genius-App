@@ -120,11 +120,28 @@ export async function generateScript(topic: string, videoLength: string, tone: s
   const targetWords = getTargetWords(videoLength);
   const durationMinutes = getDurationInMinutes(videoLength);
   
+  // Extract quantity from topic (e.g., "15 questions" -> 15)
+  const quantityMatch = topic.match(/(\d+)\s*(?:questions?|items?|tips?|ways?|steps?|examples?|ideas?|points?|things?|reasons?|secrets?|hacks?|tricks?|methods?|strategies?|techniques?|facts?)/i);
+  const requestedQuantity = quantityMatch ? parseInt(quantityMatch[1]) : null;
+  
+  // Detect Q&A format
+  const isQAFormat = /questions?\s*(?:and|&)?\s*answers?/i.test(topic);
+  
   const templateInstruction = template ? 
     `Use this content template structure: "${template}". Fill in the blanks with relevant information about the topic.` : 
     "Create an engaging and informative script structure.";
 
   const toneInstruction = getToneInstructions(tone);
+  
+  // Build quantity instruction
+  let quantityInstruction = "";
+  if (requestedQuantity) {
+    if (isQAFormat) {
+      quantityInstruction = `\nCRITICAL: The user specifically requested ${requestedQuantity} question and answer pairs. You MUST generate EXACTLY ${requestedQuantity} items in the mainContent array. Each item should have a question as the title and the answer as the content.`;
+    } else {
+      quantityInstruction = `\nCRITICAL: The user specifically requested ${requestedQuantity} items. You MUST generate EXACTLY ${requestedQuantity} items in the mainContent array.`;
+    }
+  }
 
   const prompt = `
 Create a WORLD-CLASS YouTube video script about "${topic}" with the following requirements:
@@ -134,6 +151,7 @@ READING LEVEL: 6th grade level - use simple, clear language that anyone can unde
 TONE: ${toneInstruction}
 VOCABULARY: Use common words, short sentences, and avoid jargon or complex terms
 ENGAGEMENT: Include questions, personal stories, relatable examples, and direct audience address
+${quantityInstruction}
 
 ${templateInstruction}
 
@@ -145,7 +163,7 @@ Instead, use natural conversational starters, storytelling elements, and human-l
 Structure the script with these sections:
 1. HOOK (0-5 seconds): MUST be INCREDIBLY attention-grabbing. Use pattern interrupts, shocking facts, bold questions, or compelling teasers. This is THE MOST CRITICAL 5 SECONDS.
 2. INTRODUCTION (5-30 seconds): Build credibility and preview the value. Make viewers excited to stay.
-3. MAIN CONTENT: The core teaching/entertainment content broken into logical sections with smooth transitions
+3. MAIN CONTENT: The core teaching/entertainment content broken into logical sections with smooth transitions${requestedQuantity ? ` - MUST contain EXACTLY ${requestedQuantity} items` : ""}
 4. CONCLUSION: Powerful summary with an irresistible call-to-action that drives engagement
 
 Return the response in JSON format with this structure:
@@ -162,10 +180,10 @@ Return the response in JSON format with this structure:
   },
   "mainContent": [
     {
-      "title": "Section title",
-      "content": "script content",
+      "title": "${isQAFormat ? 'Question text' : 'Section title'}",
+      "content": "${isQAFormat ? 'Answer text' : 'script content'}",
       "duration": "estimated duration"
-    }
+    }${requestedQuantity ? ` // MUST have exactly ${requestedQuantity} items in this array` : ""}
   ],
   "conclusion": {
     "title": "Conclusion & CTA",
@@ -192,7 +210,7 @@ QUALITY REQUIREMENTS:
       messages: [
         {
           role: "system",
-          content: "You are an expert YouTube scriptwriter who creates engaging, human-like content that avoids AI clichés and robotic language."
+          content: "You are an expert YouTube scriptwriter who creates engaging, human-like content that avoids AI clichés and robotic language. You MUST follow user specifications exactly, especially regarding the number of items requested."
         },
         {
           role: "user",
@@ -202,7 +220,43 @@ QUALITY REQUIREMENTS:
       response_format: { type: "json_object" },
     });
 
-    return JSON.parse(response.choices[0].message.content || "{}");
+    const parsedScript = JSON.parse(response.choices[0].message.content || "{}");
+    
+    // Validate quantity if specified
+    if (requestedQuantity && parsedScript.mainContent) {
+      const actualCount = parsedScript.mainContent.length;
+      if (actualCount !== requestedQuantity) {
+        console.warn(`Expected ${requestedQuantity} items but got ${actualCount}. Retrying...`);
+        
+        // Retry with more explicit instructions
+        const retryResponse = await openai.chat.completions.create({
+          model: "gpt-4-turbo",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert YouTube scriptwriter. You MUST generate the EXACT number of items requested by the user. This is CRITICAL."
+            },
+            {
+              role: "user",
+              content: prompt + `\n\nIMPORTANT: You previously generated ${actualCount} items but the user needs EXACTLY ${requestedQuantity}. Generate ${requestedQuantity} complete items.`
+            }
+          ],
+          response_format: { type: "json_object" },
+        });
+        
+        const retryParsed = JSON.parse(retryResponse.choices[0].message.content || "{}");
+        if (retryParsed.mainContent && retryParsed.mainContent.length === requestedQuantity) {
+          return retryParsed;
+        }
+        
+        // If still wrong, throw error
+        if (retryParsed.mainContent && retryParsed.mainContent.length !== requestedQuantity) {
+          throw new Error(`Script generation failed to produce ${requestedQuantity} items as requested (got ${retryParsed.mainContent.length}). Please try again.`);
+        }
+      }
+    }
+    
+    return parsedScript;
   } catch (error) {
     throw new Error("Failed to generate script: " + (error as Error).message);
   }
